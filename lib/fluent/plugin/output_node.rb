@@ -9,7 +9,7 @@ require 'proxifier'
 require_relative 'openssl_util'
 
 class Fluent::SecureForwardOutput::Node
-  attr_accessor :host, :port, :hostlabel, :shared_key, :username, :password, :standby
+  attr_accessor :host, :port, :hostlabel, :shared_key, :username, :password, :standby, :sni_host
 
   attr_accessor :authentication, :keepalive
   attr_accessor :socket, :sslsession, :unpacker, :shared_key_salt, :state
@@ -23,6 +23,7 @@ class Fluent::SecureForwardOutput::Node
     @shared_key = conf.shared_key || sender.shared_key
 
     @host = conf.host
+    @sni_host = conf.sni_host
     @port = conf.port
     @hostlabel = conf.hostlabel || conf.host
     @username = conf.username
@@ -294,6 +295,11 @@ class Fluent::SecureForwardOutput::Node
     log.debug "trying to connect ssl session", host: @host, address: addr, port: @port
     begin
       sslsession = OpenSSL::SSL::SSLSocket.new(sock, context)
+      log.debug "---> enable SNI"
+      
+      sslsession.hostname = @sni_host
+      log.debug "-->> check SNI host", host: sslsession.hostname
+
       log.trace "connecting...", host: @host, address: addr, port: @port
       sslsession.connect
       @mtime = Time.now

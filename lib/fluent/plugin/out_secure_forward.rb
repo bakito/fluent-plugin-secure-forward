@@ -62,6 +62,7 @@ module Fluent
       config_param :password, :string, default: '', secret: true
       config_param :standby, :bool, default: false
       config_param :proxy_uri, :string, default: nil
+      config_param :sni_host, :string, default: nil
     end
     attr_reader :nodes
 
